@@ -2,6 +2,7 @@
 import os
 import shutil
 import sys
+import datetime
 
 IGNORE_PATTERNS = ('.myvcs','^.git')
 
@@ -33,7 +34,6 @@ def overriteDirectory(src, dest):
 			shutil.copyfile(itempath, localpath)	
 
 def getcurrentversion():
-	src = os.getcwd()
 	dest = os.path.join(os.getcwd(), ".myvcs")
 	f = open(os.path.join(dest, "head"),"r+")
 	s = f.readline()
@@ -41,12 +41,20 @@ def getcurrentversion():
 	return int(s)
 
 def updateversion(version_num):
-	src = os.getcwd()
 	dest = os.path.join(os.getcwd(), ".myvcs")
 	f = open(os.path.join(dest, "head"),"w")
 	f.write(str(version_num))
 	f.close()
 
+def logSnap(message):
+	timestamp = str(datetime.datetime.now())
+	version = str(getcurrentversion())
+	dest = os.path.join(os.getcwd(), ".myvcs")
+	f = open(os.path.join(dest, "log"), "a")
+	s = " Time: {0} | Version: {1} | Message: {2} \n".format(timestamp, version, message)
+	f.write(s)
+	f.close()
+	return
 
 def copy(arguments):
 	init = str(0)
@@ -68,6 +76,14 @@ def snapshot(arguments):
 	dest = os.path.join(base, str(counter))
 	shutil.copytree(src, dest, ignore=shutil.ignore_patterns(*IGNORE_PATTERNS))
 	updateversion(counter)
+	if not arguments:
+		logSnap(" ")
+	elif str(arguments[0]) == '-m' and len(arguments) > 1 :
+		message = ' '.join(arguments[1:])
+		logSnap(message)
+	else:
+		logSnap(" ")
+
 
 def checkout(arguments):
 	version = int(arguments[0])
@@ -107,8 +123,16 @@ def init(arguments=None):
 def current(arguments):
 	print getcurrentversion()
 
-def log():
-	return
+def log(arguments):
+	dest = os.path.join(os.getcwd(), ".myvcs")
+	try:	
+		f = open(os.path.join(dest, "log"), "r")
+		lines = f.readlines()
+		for line in lines:
+			print line
+	except:
+		print "log empty"
+
 
 function_map = { 
 	'init' : init,
