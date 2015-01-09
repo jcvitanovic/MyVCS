@@ -7,6 +7,10 @@ IGNORE_PATTERNS = ('.myvcs','^.git')
 
 def overriteDirectory(src, dest):
 
+	if not os.path.isdir(dest):
+		print "Error"
+		return
+
 	currentDirContent = os.listdir(src)
 	versionDirContent = os.listdir(dest)
 
@@ -28,13 +32,32 @@ def overriteDirectory(src, dest):
 		if(os.path.isfile(itempath)):
 			shutil.copyfile(itempath, localpath)	
 
+def getcurrentversion():
+	src = os.getcwd()
+	dest = os.path.join(os.getcwd(), ".myvcs")
+	f = open(os.path.join(dest, "head"),"r+")
+	s = f.readline()
+	f.close()
+	return int(s)
+
+def updateversion(version_num):
+	src = os.getcwd()
+	dest = os.path.join(os.getcwd(), ".myvcs")
+	f = open(os.path.join(dest, "head"),"w")
+	f.write(str(version_num))
+	f.close()
+
+
 def copy(arguments):
-	print "here"
+	init = str(0)
 	src = os.getcwd()
 	dest = os.path.join(src, ".myvcs")
 	if os.path.exists(dest):
 		shutil.rmtree(dest)
 	shutil.copytree(src, dest)
+	f = open(os.path.join(dest, "head"),"w")
+	f.write(init)
+	f.close()
 
 def snapshot(arguments):
 	src = os.getcwd()
@@ -44,6 +67,7 @@ def snapshot(arguments):
 		counter += 1
 	dest = os.path.join(base, str(counter))
 	shutil.copytree(src, dest, ignore=shutil.ignore_patterns(*IGNORE_PATTERNS))
+	updateversion(counter)
 
 def checkout(arguments):
 	version = int(arguments[0])
@@ -56,7 +80,7 @@ def checkout(arguments):
 		return
 
 	overriteDirectory(os.getcwd(), dest)
-	
+	updateversion(version)
 	
 
 def latest(arguments):
@@ -68,13 +92,32 @@ def latest(arguments):
 	counter -= 1
 	dest = os.path.join(base, str(counter))
 	overriteDirectory(src, dest)
+	updateversion(counter)
 
+def init(arguments=None):
+	init = str(0)
+	dest = os.path.join(os.getcwd(), ".myvcs")
+	if os.path.exists(dest):
+		shutil.rmtree(dest)
+	os.mkdir(dest)
+	f = open(os.path.join(dest, "head"),"w")
+	f.write(init)
+	f.close()
+
+def current(arguments):
+	print getcurrentversion()
+
+def log():
+	return
 
 function_map = { 
+	'init' : init,
     'copy': copy,
     'snapshot' : snapshot,
     'checkout' : checkout,
-    'latest' : latest
+    'latest' : latest,
+    'current' : current,
+    'log' : log
 }
 
 if __name__ == "__main__":
