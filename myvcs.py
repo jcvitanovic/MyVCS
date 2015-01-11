@@ -84,7 +84,6 @@ def snapshot(arguments):
 	else:
 		logSnap(" ")
 
-
 def checkout(arguments):
 	version = int(arguments[0])
 	src = os.getcwd()
