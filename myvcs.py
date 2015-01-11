@@ -46,12 +46,12 @@ def updateversion(version_num):
 	f.write(str(version_num))
 	f.close()
 
-def logSnap(message):
+def logSnap(message, parent):
 	timestamp = str(datetime.datetime.now())
 	version = str(getcurrentversion())
 	dest = os.path.join(os.getcwd(), ".myvcs")
 	f = open(os.path.join(dest, "log"), "a")
-	s = " Time: {0} | Version: {1} | Message: {2} \n".format(timestamp, version, message)
+	s = " {0}# {1}|{2}|{3} \n".format(version, parent, timestamp, message)
 	f.write(s)
 	f.close()
 	return
@@ -75,14 +75,15 @@ def snapshot(arguments):
 		counter += 1
 	dest = os.path.join(base, str(counter))
 	shutil.copytree(src, dest, ignore=shutil.ignore_patterns(*IGNORE_PATTERNS))
+	parent = getcurrentversion()
 	updateversion(counter)
 	if not arguments:
-		logSnap(" ")
+		logSnap(" ", str(parent))
 	elif str(arguments[0]) == '-m' and len(arguments) > 1 :
 		message = ' '.join(arguments[1:])
-		logSnap(message)
+		logSnap(message, str(parent))
 	else:
-		logSnap(" ")
+		logSnap(" ", str(parent))
 
 def checkout(arguments):
 	version = int(arguments[0])
@@ -92,8 +93,7 @@ def checkout(arguments):
 
 	if not os.path.isdir(dest):
 		print "Error"
-		return
-
+		return	
 	overriteDirectory(os.getcwd(), dest)
 	updateversion(version)
 	
@@ -124,11 +124,22 @@ def current(arguments):
 
 def log(arguments):
 	dest = os.path.join(os.getcwd(), ".myvcs")
+	logDictTree = {}
 	try:	
 		f = open(os.path.join(dest, "log"), "r")
 		lines = f.readlines()
 		for line in lines:
-			print line
+			version = line.split('#')[0]
+			parent = (line.split('#')[1]).split('|')[0]
+			parent = int(parent)
+			version = int(version)
+			logDictTree[version] = (parent, (line.split('#')[1]).split('|')[1:])
+		currentVersion = getcurrentversion()
+		print "Version: {0}|Time: {1}|Message: {2}".format(currentVersion, logDictTree[currentVersion][1][0], logDictTree[currentVersion][1][1])
+		parent = logDictTree[currentVersion][0]
+		while parent != 0:
+			print "Version: {0}|Time: {1}|Message: {2}".format(parent, logDictTree[parent][1][0], logDictTree[parent][1][1])
+			parent = logDictTree[parent][0]
 	except:
 		print "log empty"
 
