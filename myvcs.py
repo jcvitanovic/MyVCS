@@ -168,7 +168,7 @@ def printDiffFiles(first, second, dcmp):
 
 def diff(arguments):
 	if len(arguments)<2:
-		print 'error'
+		print 'invalid input'
 		return
 	else:
 		first = arguments[0]
