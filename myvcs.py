@@ -7,7 +7,7 @@ import filecmp
 from filecmp import dircmp
 import zipfile
 
-IGNORE_PATTERNS = ('.myvcs','^.git')
+IGNORE_PATTERNS = ('.myvcs','.git')
 
 def compressDirectory(name,path):
 	zip = zipfile.ZipFile(name, 'w')
@@ -181,6 +181,19 @@ def diff(arguments):
 		#dcmp.report_partial_closure()
 		printDiffFiles(first, second, dcmp)
 
+def status(arguments = None):
+	first = getcurrentversion()
+	destfirst = os.path.join(os.getcwd(), ".myvcs")
+	destfirst = os.path.join(destfirst, str(first))
+	destsecond = os.getcwd()
+	print 'comparing: ' + destfirst  + ' ' + destsecond
+	dcmp = dircmp(destfirst, destsecond, ignore = ['.git', '.myvcs'])
+	printDiffFiles(first, 'current', dcmp)
+
+
+def help(arguments = None):
+	print 'hello'
+
 
 function_map = { 
 	'init' : init,
@@ -190,7 +203,9 @@ function_map = {
 	'latest' : latest,
 	'current' : current,
 	'log' : log,
-	'diff' : diff
+	'diff' : diff,
+	'help' : help,
+	'status': status
 }
 
 if __name__ == "__main__":
