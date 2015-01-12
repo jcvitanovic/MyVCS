@@ -184,13 +184,13 @@ def diff(arguments):
 
 function_map = { 
 	'init' : init,
-    'copy': copy,
-    'snapshot' : snapshot,
-    'checkout' : checkout,
-    'latest' : latest,
-    'current' : current,
-    'log' : log,
-    'diff' : diff
+	'copy': copy,
+	'snapshot' : snapshot,
+	'checkout' : checkout,
+	'latest' : latest,
+	'current' : current,
+	'log' : log,
+	'diff' : diff
 }
 
 if __name__ == "__main__":
