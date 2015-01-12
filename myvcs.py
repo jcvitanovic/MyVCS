@@ -3,8 +3,19 @@ import os
 import shutil
 import sys
 import datetime
+import filecmp
+from filecmp import dircmp
+import zipfile
 
 IGNORE_PATTERNS = ('.myvcs','^.git')
+
+def compressDirectory(name,path):
+	zip = zipfile.ZipFile(name, 'w')
+	for root, dirs, files in os.walk(path):
+		for file in files:
+			zip.write(os.path.join(root, file))
+	zip.close()
+	return
 
 def overriteDirectory(src, dest):
 
@@ -87,9 +98,8 @@ def snapshot(arguments):
 
 def checkout(arguments):
 	version = int(arguments[0])
-	src = os.getcwd()
-	base = os.path.join(src, ".myvcs")
-	dest = os.path.join(base, str(version))
+	dest = os.path.join(os.getcwd(), ".myvcs")
+	dest = os.path.join(dest, str(version))
 
 	if not os.path.isdir(dest):
 		print "Error"
@@ -144,6 +154,34 @@ def log(arguments):
 		print "log empty"
 
 
+def printDiffFiles(first, second, dcmp):
+	for name in dcmp.diff_files:
+		print "\033[1;31mFile {0} different in versions {1} and {2}\033[1;m".format(name, first, second)
+	for name in dcmp.left_only:
+		print "\033[1;33mFile/dir {0} only in version {1}\033[1;m".format(name, first)
+	for name in dcmp.right_only:
+		print "\033[1;34mFile/dir {0} only in version {1}\033[1;m".format(name, second)	
+	#for name in dcmp.same_files:
+	#	print "\033[1;30mFile {0} identical in versions {1} and {2}\033[1;m".format(name, first, second)
+	for sub_dir in dcmp.subdirs.values():
+		printDiffFiles(first, second, sub_dir)
+
+def diff(arguments):
+	if len(arguments)<2:
+		print 'error'
+		return
+	else:
+		first = arguments[0]
+		second = arguments[1]
+		dest = os.path.join(os.getcwd(), ".myvcs")
+		destfirst = os.path.join(dest, str(first))
+		destsecond = os.path.join(dest, str(second))
+		dcmp = dircmp(destfirst, destsecond)
+		#dcmp.report()
+		#dcmp.report_partial_closure()
+		printDiffFiles(first, second, dcmp)
+
+
 function_map = { 
 	'init' : init,
     'copy': copy,
@@ -151,7 +189,8 @@ function_map = {
     'checkout' : checkout,
     'latest' : latest,
     'current' : current,
-    'log' : log
+    'log' : log,
+    'diff' : diff
 }
 
 if __name__ == "__main__":
