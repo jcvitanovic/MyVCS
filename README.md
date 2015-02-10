@@ -13,7 +13,7 @@ current : print current version number in the terminal
 
 checkout <n> : revert to version num <n>
 
-diff <x> <y>: print changes between versions <x> and <y> on terminal (modified common files, files /sub directories only in version <x>, files / sub directories only in version <y> –  I even color the terminal lines according to status red is modified, only left-side files are yellow, only right sides are blue
+diff <x> <y>: print changes between versions <x> and <y> on terminal (modified common files, files /sub directories only in version <x>, files / sub directories only in version <y> –  Color print the lines according to status (red is modified, only left-side files are yellow, only right sides are blue)
 
 status : same as previous, but shows diff between current working version and active backup
 
